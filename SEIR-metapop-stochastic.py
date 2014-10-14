@@ -41,7 +41,7 @@ class Population(object):
         self.N -= 1
 	self.S -= 1
 
-    def infect(self):
+    def expose(self):
         self.S -= 1
 	self.E += 1
 
@@ -73,7 +73,7 @@ def psdeath(s):
     p_sdeath = mu*s
     return p_sdeath
 
-def pinfect(s, i, n):
+def pexpose(s, i, n):
     p_infect = beta*s*i/(n+1)    #warning, adding 1 to n to avoid /0 error
     return p_infect
 
@@ -104,7 +104,7 @@ psum = []
 for x in range(0, metapopsize):
     pop.append(Population(x, 10000, 1500, 0, 10, 8490))
     psum.append((pbirth(pop[x].N) + psdeath(pop[x].S) +
-              pinfect(pop[x].S, pop[x].I, pop[x].N) +
+              pexpose(pop[x].S, pop[x].I, pop[x].N) +
               pedeath(pop[x].E) + psymptom(pop[x].E) + pideath(pop[x].I) + 
 	      precover(pop[x].I) + prdeath(pop[x].R)))
 	
@@ -114,7 +114,7 @@ for x in range(0, metapopsize):
     popprob.append(psum[x]/pmetasum)
 
 #print precover(pop[2].I)
-#print pinfect(pop[3].S, pop[3].I, pop[3].N)
+#print pexpose(pop[3].S, pop[3].I, pop[3].N)
 
 dataArray = np.array([0, 10000, 1500, 0, 10, 8490]) #default values for now :(
 
@@ -135,24 +135,24 @@ while t < tmax:
     elif y_2 < (pbirth(pop[popselect].N)+psdeath(pop[popselect].S))/psum[popselect]:
 	pop[popselect].sdeath()
     elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
-	      + pinfect(pop[popselect].S, pop[popselect].I, pop[popselect].N))
+	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N))
               /psum[popselect]):
-	pop[popselect].infect()
+	pop[popselect].expose()
     elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
-	      + pinfect(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
+	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
 	      pedeath(pop[popselect].E))/psum[popselect]):
 	pop[popselect].edeath()
     elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
-	      + pinfect(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
+	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
 	      pedeath(pop[popselect].E)+psymptom(pop[popselect].E))/psum[popselect]):
 	pop[popselect].symptom()
     elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
-	      + pinfect(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
+	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
 	      pedeath(pop[popselect].E)+psymptom(pop[popselect].E)+
 	      pideath(pop[popselect].I))/psum[popselect]):
 	pop[popselect].ideath()
     elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
-	      + pinfect(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
+	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
 	      pedeath(pop[popselect].E)+psymptom(pop[popselect].E)+
 	      pideath(pop[popselect].I)+precover(pop[popselect].I))/psum[popselect]):
 	pop[popselect].recover()
@@ -160,7 +160,7 @@ while t < tmax:
 	pop[popselect].rdeath()
 	#now update all the probabilities qq
     psum[popselect] = ((pbirth(pop[popselect].N) + psdeath(pop[popselect].S) +
-              pinfect(pop[popselect].S, pop[popselect].I, pop[popselect].N) +
+              pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N) +
               pedeath(pop[popselect].E) + psymptom(pop[popselect].E) +
 	      pideath(pop[popselect].I) + precover(pop[popselect].I) +
 	      prdeath(pop[popselect].R)))
