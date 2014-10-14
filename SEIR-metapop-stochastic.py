@@ -74,7 +74,7 @@ def psdeath(s):
     return p_sdeath
 
 def pexpose(s, i, n):
-    p_infect = beta*s*i/(n+1)    #warning, adding 1 to n to avoid /0 error
+    p_infect = beta*s*i/(n)    #warning, adding 1 to n to avoid /0 error (never mind)
     return p_infect
 
 def pedeath(e):
