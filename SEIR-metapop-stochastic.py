@@ -6,10 +6,12 @@ import pandas as pd
 
 #attemtps to implement a gillespie direct method on an SEIR model
 #with metapopulations
-#2014-10-14 First attempt
 #
-#TODO fix apparent bug where I somehow exceeds E?
-#I is properly delayed but the curves should be the same height
+#TODO 
+#Also: make sure the population selection + "popprob" probabilities are doing
+#what they're supposed to be doing
+#
+#Add import event
 
 #first define all parameters
 mu = 1.00/70                             #death rate
@@ -110,7 +112,7 @@ for x in range(0, metapopsize):
 	
 pmetasum = sum(psum)
 popprob = []
-for x in range(0, metapopsize):
+for x in range(0, metapopsize): #this needs to go in the loop :(
     popprob.append(psum[x]/pmetasum)
 
 #print precover(pop[2].I)
@@ -119,39 +121,39 @@ for x in range(0, metapopsize):
 dataArray = np.array([0, 10000, 1500, 0, 10, 8490]) #default values for now :(
 
 while t < tmax:
-    y_1, y_2, y_3 = random.random(), random.random(), random.random()
-    dt = -math.log(y_1)/pmetasum
+    randomtime, randomevent, randompopulation = random.random(), random.random(), random.random()
+    dt = -math.log(randomtime)/pmetasum
     popchoice = 0
     popselect = 0
     #make sure (prove?) the following selection of which population to perform
-    #the next event is actually choosing properly
-    while popchoice < y_2:
+    #the next event is actually choosing properly (it's not)
+    while (popchoice < randompopulation) and (popselect<(metapopsize)):
         popchoice = popchoice + popprob[popselect]
 	popselect += 1
     popselect -=1
     #print popselect
-    if y_2 < pbirth(pop[popselect].N)/psum[popselect]:
+    if randomevent < pbirth(pop[popselect].N)/psum[popselect]:
         pop[popselect].birth()
-    elif y_2 < (pbirth(pop[popselect].N)+psdeath(pop[popselect].S))/psum[popselect]:
+    elif randomevent < (pbirth(pop[popselect].N)+psdeath(pop[popselect].S))/psum[popselect]:
 	pop[popselect].sdeath()
-    elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
+    elif randomevent < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
 	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N))
               /psum[popselect]):
 	pop[popselect].expose()
-    elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
+    elif randomevent < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
 	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
 	      pedeath(pop[popselect].E))/psum[popselect]):
 	pop[popselect].edeath()
-    elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
+    elif randomevent < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
 	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
 	      pedeath(pop[popselect].E)+psymptom(pop[popselect].E))/psum[popselect]):
 	pop[popselect].symptom()
-    elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
+    elif randomevent < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
 	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
 	      pedeath(pop[popselect].E)+psymptom(pop[popselect].E)+
 	      pideath(pop[popselect].I))/psum[popselect]):
 	pop[popselect].ideath()
-    elif y_2 < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
+    elif randomevent < ((pbirth(pop[popselect].N)+psdeath(pop[popselect].S)
 	      + pexpose(pop[popselect].S, pop[popselect].I, pop[popselect].N)+
 	      pedeath(pop[popselect].E)+psymptom(pop[popselect].E)+
 	      pideath(pop[popselect].I)+precover(pop[popselect].I))/psum[popselect]):
@@ -165,14 +167,17 @@ while t < tmax:
 	      pideath(pop[popselect].I) + precover(pop[popselect].I) +
 	      prdeath(pop[popselect].R)))
     pmetasum = sum(psum)
+    popprob[popselect]=(psum[popselect]/pmetasum)
     if t > t_append:
 	t_append = t_append + 1.0/365.0
 	t += dt
 	#dataArray stuff save data for whatever
 	dataArray = np.vstack((dataArray,[t, pop[1].N, pop[1].S, pop[1].E, pop[1].I,
 	                     pop[1].R]))
+	#print popselect
     else:
         t += dt
+	
 plt.figure()
 plt.ioff()
 plt.plot(dataArray[:,0],dataArray[:,2])
@@ -183,4 +188,6 @@ plt.plot(dataArray[:,0],dataArray[:,4])
 plt.show()
 #print psum
 #print pmetasum
+
 #print popprob
+#print sum(popprob)
